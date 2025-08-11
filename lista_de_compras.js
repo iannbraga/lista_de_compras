@@ -144,7 +144,7 @@ createApp({
 
       // Checa se está entre hh:00 e hh:01 para evitar notificações repetidas
       const is8am = hour === 8 && minute === 0;
-      const is6pm = hour === 19 && minute === 50;
+      const is6pm = hour === 20 && minute === 10;
 
       return is8am || is6pm;
     }
