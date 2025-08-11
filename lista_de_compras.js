@@ -204,6 +204,7 @@ createApp({
       exportList,
       importList,
       formatDate,
+      resetForm,
       editingIndex,
     };
   },

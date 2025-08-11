@@ -3,106 +3,89 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Lista de Compras Vue 3 + Bulma + VueUse</title>
+    <title>Lista de Compras Vue 3 + Bootstrap + VueUse</title>
+
+    <!-- Bootstrap 5 CSS -->
     <link
-      href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
       rel="stylesheet"
     />
+
     <!-- Vue 3 via CDN -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <!-- VueUse Core via CDN -->
     <script src="https://unpkg.com/@vueuse/shared"></script>
     <script src="https://unpkg.com/@vueuse/core"></script>
-    <!-- Script.js -->
+
+    <!-- Seu script -->
     <script defer src="lista_de_compras.js"></script>
-    <style>
-      /* Ajustes para container em telas pequenas */
-      @media (max-width: 768px) {
-        #app.container {
-          padding-left: 1rem;
-          padding-right: 1rem;
-        }
-      }
-
-      /* Reduz espaçamento e deixa botão alinhado no mobile */
-      .field.is-flex {
-        gap: 0.5rem;
-      }
-
-      /* Ajuste no botão para ficar no topo no mobile */
-      @media (max-width: 768px) {
-        .field.is-flex > .control:last-child {
-          margin-top: 0.5rem;
-          flex-shrink: 0;
-        }
-      }
-    </style>
   </head>
   <body>
-    <section class="section">
+    <section class="py-4">
       <div id="app" class="container">
-        <h1 class="title">Lista de Compras</h1>
+        <h1 class="mb-4">Lista de Compras</h1>
 
         <!-- Form para adicionar item -->
-        <div
-          class="field is-flex is-flex-wrap-wrap is-align-items-center"
-          style="gap: 0.5rem"
-        >
-          <div
-            class="control is-expanded"
-            style="min-width: 200px; flex-grow: 1"
-          >
+        <form @submit.prevent="addItem" class="row g-2 align-items-center mb-4">
+          <div class="col-12 col-md flex-grow-1">
             <input
               v-model="newItem.name"
-              class="input"
               type="text"
+              class="form-control"
               placeholder="Nome do item"
+              required
             />
           </div>
 
-          <div class="control" style="min-width: 80px">
+          <div class="col-4 col-md-2">
             <input
               v-model.number="newItem.quantity"
-              class="input"
               type="number"
               min="1"
+              class="form-control"
               placeholder="Qtd"
+              required
             />
           </div>
 
-          <div class="control" style="min-width: 150px">
+          <div class="col-6 col-md-3">
             <input
               v-model="newItem.validade"
-              class="input"
               type="date"
+              class="form-control"
               placeholder="Validade"
             />
           </div>
 
-          <div class="control">
-            <button
-              @click="addItem"
-              class="button is-primary"
-              :disabled="!canAdd"
-            >
+          <div class="col-6 col-md-auto d-flex gap-2">
+            <button type="submit" class="btn btn-primary" :disabled="!canAdd">
               {{ editingIndex === -1 ? "Adicionar" : "Salvar" }}
             </button>
+
+            <button
+              v-if="editingIndex !== -1"
+              type="button"
+              class="btn btn-secondary"
+              @click="resetForm"
+            >
+              Cancelar
+            </button>
           </div>
-        </div>
+        </form>
 
         <!-- Lista de itens -->
-        <div v-if="items.length === 0" class="notification is-warning">
+        <div v-if="items.length === 0" class="alert alert-warning">
           A lista está vazia.
         </div>
 
-        <div style="overflow-x: auto">
-          <table class="table is-fullwidth is-striped">
+        <div v-else class="table-responsive">
+          <table class="table table-striped align-middle">
             <thead>
               <tr>
                 <th>Item</th>
                 <th>Quantidade</th>
                 <th>Validade</th>
-                <th></th>
+                <th style="width: 150px"></th>
               </tr>
             </thead>
             <tbody>
@@ -113,13 +96,13 @@
                 <td>
                   <button
                     @click="editItem(index)"
-                    class="button is-warning is-small mr-2"
+                    class="btn btn-warning btn-sm me-2"
                   >
                     Editar
                   </button>
                   <button
                     @click="removeItem(index)"
-                    class="button is-danger is-small"
+                    class="btn btn-danger btn-sm"
                   >
                     Excluir
                   </button>
@@ -130,22 +113,23 @@
         </div>
 
         <!-- Exportar / Importar -->
-        <div class="buttons mt-4">
-          <button @click="exportList" class="button is-link">
+        <div class="d-flex gap-2 mt-4 flex-wrap">
+          <button @click="exportList" class="btn btn-info">
             Exportar Lista (JSON)
           </button>
 
-          <label class="button is-info">
+          <label class="btn btn-secondary mb-0">
             Importar Lista (JSON)
             <input type="file" @change="importList" accept=".json" hidden />
           </label>
         </div>
 
         <!-- Mensagem feedback -->
-        <div v-if="message" class="notification is-primary mt-3">
-          {{ message }}
-        </div>
+        <div v-if="message" class="alert alert-primary mt-3">{{ message }}</div>
       </div>
     </section>
+
+    <!-- Bootstrap 5 JS Bundle (opcional, só se usar JS do Bootstrap) -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> -->
   </body>
 </html>
