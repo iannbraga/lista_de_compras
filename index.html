@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Lista de Compras Vue 3 + Bulma + VueUse</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"
+      rel="stylesheet"
+    />
+    <!-- Vue 3 via CDN -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <!-- VueUse Core via CDN -->
+    <script src="https://unpkg.com/@vueuse/shared"></script>
+    <script src="https://unpkg.com/@vueuse/core"></script>
+    <!-- Script.js -->
+    <script defer src="lista_de_compras.js"></script>
+  </head>
+  <body>
+    <section class="section">
+      <div id="app" class="container">
+        <h1 class="title">Lista de Compras</h1>
+
+        <!-- Form para adicionar item -->
+        <div class="field is-grouped is-align-items-center">
+          <div class="control is-expanded">
+            <input
+              v-model="newItem.name"
+              class="input"
+              type="text"
+              placeholder="Nome do item"
+            />
+          </div>
+          <div class="control" style="width: 120px">
+            <input
+              v-model.number="newItem.quantity"
+              class="input"
+              type="number"
+              min="1"
+              placeholder="Qtd"
+            />
+          </div>
+          <div class="control" style="width: 180px">
+            <input
+              v-model="newItem.validade"
+              class="input"
+              type="date"
+              placeholder="Validade"
+            />
+          </div>
+          <div class="control">
+            <button
+              @click="addItem"
+              class="button is-primary"
+              :disabled="!canAdd"
+            >
+              {{ editingIndex === -1 ? "Adicionar" : "Salvar" }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Lista de itens -->
+        <div v-if="items.length === 0" class="notification is-warning">
+          A lista está vazia.
+        </div>
+        <table v-else class="table is-fullwidth is-striped">
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Quantidade</th>
+              <th>Validade</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(item, index) in items" :key="index">
+              <td>{{ item.name }}</td>
+              <td>{{ item.quantity }}</td>
+              <td>{{ formatDate(item.validade) }}</td>
+              <td>
+                <button
+                  @click="editItem(index)"
+                  class="button is-warning is-small mr-2"
+                >
+                  Editar
+                </button>
+                <button
+                  @click="removeItem(index)"
+                  class="button is-danger is-small"
+                >
+                  Excluir
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Exportar / Importar -->
+        <div class="buttons mt-4">
+          <button @click="exportList" class="button is-link">
+            Exportar Lista (JSON)
+          </button>
+
+          <label class="button is-info">
+            Importar Lista (JSON)
+            <input type="file" @change="importList" accept=".json" hidden />
+          </label>
+        </div>
+
+        <!-- Mensagem feedback -->
+        <div v-if="message" class="notification is-primary mt-3">
+          {{ message }}
+        </div>
+      </div>
+    </section>
+  </body>
+</html>
