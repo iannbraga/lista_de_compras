@@ -2,6 +2,7 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Lista de Compras Vue 3 + Bulma + VueUse</title>
     <link
       href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"
@@ -14,6 +15,28 @@
     <script src="https://unpkg.com/@vueuse/core"></script>
     <!-- Script.js -->
     <script defer src="lista_de_compras.js"></script>
+    <style>
+      /* Ajustes para container em telas pequenas */
+      @media (max-width: 768px) {
+        #app.container {
+          padding-left: 1rem;
+          padding-right: 1rem;
+        }
+      }
+
+      /* Reduz espaçamento e deixa botão alinhado no mobile */
+      .field.is-flex {
+        gap: 0.5rem;
+      }
+
+      /* Ajuste no botão para ficar no topo no mobile */
+      @media (max-width: 768px) {
+        .field.is-flex > .control:last-child {
+          margin-top: 0.5rem;
+          flex-shrink: 0;
+        }
+      }
+    </style>
   </head>
   <body>
     <section class="section">
@@ -21,8 +44,14 @@
         <h1 class="title">Lista de Compras</h1>
 
         <!-- Form para adicionar item -->
-        <div class="field is-grouped is-align-items-center">
-          <div class="control is-expanded">
+        <div
+          class="field is-flex is-flex-wrap-wrap is-align-items-center"
+          style="gap: 0.5rem"
+        >
+          <div
+            class="control is-expanded"
+            style="min-width: 200px; flex-grow: 1"
+          >
             <input
               v-model="newItem.name"
               class="input"
@@ -30,7 +59,8 @@
               placeholder="Nome do item"
             />
           </div>
-          <div class="control" style="width: 120px">
+
+          <div class="control" style="min-width: 80px">
             <input
               v-model.number="newItem.quantity"
               class="input"
@@ -39,7 +69,8 @@
               placeholder="Qtd"
             />
           </div>
-          <div class="control" style="width: 180px">
+
+          <div class="control" style="min-width: 150px">
             <input
               v-model="newItem.validade"
               class="input"
@@ -47,6 +78,7 @@
               placeholder="Validade"
             />
           </div>
+
           <div class="control">
             <button
               @click="addItem"
@@ -62,37 +94,40 @@
         <div v-if="items.length === 0" class="notification is-warning">
           A lista está vazia.
         </div>
-        <table v-else class="table is-fullwidth is-striped">
-          <thead>
-            <tr>
-              <th>Item</th>
-              <th>Quantidade</th>
-              <th>Validade</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(item, index) in items" :key="index">
-              <td>{{ item.name }}</td>
-              <td>{{ item.quantity }}</td>
-              <td>{{ formatDate(item.validade) }}</td>
-              <td>
-                <button
-                  @click="editItem(index)"
-                  class="button is-warning is-small mr-2"
-                >
-                  Editar
-                </button>
-                <button
-                  @click="removeItem(index)"
-                  class="button is-danger is-small"
-                >
-                  Excluir
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+
+        <div style="overflow-x: auto">
+          <table class="table is-fullwidth is-striped">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Quantidade</th>
+                <th>Validade</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(item, index) in items" :key="index">
+                <td>{{ item.name }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ formatDate(item.validade) }}</td>
+                <td>
+                  <button
+                    @click="editItem(index)"
+                    class="button is-warning is-small mr-2"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    @click="removeItem(index)"
+                    class="button is-danger is-small"
+                  >
+                    Excluir
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
         <!-- Exportar / Importar -->
         <div class="buttons mt-4">
