@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cadastro de Produtos</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+
+    <!-- Vue 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+
+    <!-- HTML5 QRCode -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+  </head>
+  <body>
+    <div id="app" class="container py-4">
+      <h2 class="mb-4">Cadastro de Produtos</h2>
+
+      <!-- Scanner -->
+      <div class="mb-3">
+        <label class="form-label">Código de Barras / QR Code</label>
+        <div
+          id="reader"
+          style="width: 300px; border: 1px solid #ccc; display: none"
+        ></div>
+        <input
+          type="text"
+          class="form-control mt-2"
+          placeholder="Ou digite o código manualmente"
+          v-model="form.codigo"
+        />
+        <button class="btn btn-secondary mt-2" @click="abrirScanner">
+          Abrir Scanner
+        </button>
+      </div>
+
+      <!-- Formulário -->
+      <div class="mb-3">
+        <label class="form-label">Nome do Produto</label>
+        <input type="text" class="form-control" v-model="form.nome" />
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Preço (R$)</label>
+        <input
+          type="number"
+          step="0.01"
+          class="form-control"
+          v-model="form.preco"
+        />
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Data de Validade</label>
+        <input type="date" class="form-control" v-model="form.validade" />
+      </div>
+
+      <button class="btn btn-primary" @click="cadastrarProduto">
+        Cadastrar Produto
+      </button>
+
+      <hr class="my-4" />
+
+      <h4>Produtos Cadastrados</h4>
+      <table class="table table-striped mt-3" v-if="produtos.length > 0">
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Nome</th>
+            <th>Preço</th>
+            <th>Validade</th>
+            <th>Data Cadastro</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(p, index) in produtos" :key="index">
+            <td>{{ p.codigo }}</td>
+            <td>{{ p.nome }}</td>
+            <td>R$ {{ p.preco.toFixed(2) }}</td>
+            <td>{{ p.validade }}</td>
+            <td>{{ p.dataCadastro }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+      const { createApp } = Vue;
+
+      createApp({
+        data() {
+          return {
+            form: { codigo: "", nome: "", preco: 0, validade: "" },
+            produtos: [],
+            html5QrCode: null,
+            scannerAtivo: false,
+          };
+        },
+        mounted() {
+          // Inicializa scanner
+          this.html5QrCode = new Html5Qrcode("reader");
+
+          // Carrega produtos do LocalStorage
+          this.produtos = JSON.parse(localStorage.getItem("produtos")) || [];
+        },
+        methods: {
+          abrirScanner() {
+            if (this.scannerAtivo) return;
+            this.scannerAtivo = true;
+            document.getElementById("reader").style.display = "block";
+
+            Html5Qrcode.getCameras()
+              .then((cameras) => {
+                if (!cameras || !cameras.length) {
+                  alert("Nenhuma câmera encontrada!");
+                  return;
+                }
+
+                // Tenta selecionar a câmera traseira (back), se não existir, pega a primeira
+                const camera =
+                  cameras.find((cam) =>
+                    cam.label.toLowerCase().includes("back")
+                  ) || cameras[0];
+
+                this.html5QrCode.start(
+                  camera.id,
+                  { fps: 10, qrbox: { width: 300, height: 300 } }, // QR box maior para celulares
+                  (decodedText) => {
+                    this.form.codigo = decodedText;
+                    this.fecharScanner();
+                  },
+                  (errorMessage) => {}
+                );
+              })
+              .catch((err) => console.error("Erro ao acessar câmera:", err));
+          },
+          fecharScanner() {
+            this.html5QrCode.stop().then(() => {
+              document.getElementById("reader").style.display = "none";
+              this.scannerAtivo = false;
+            });
+          },
+          cadastrarProduto() {
+            if (
+              !this.form.codigo ||
+              !this.form.nome ||
+              !this.form.preco ||
+              !this.form.validade
+            ) {
+              alert("Preencha todos os campos!");
+              return;
+            }
+            const novoProduto = {
+              codigo: this.form.codigo,
+              nome: this.form.nome,
+              preco: parseFloat(this.form.preco),
+              validade: this.form.validade,
+              dataCadastro: new Date().toLocaleDateString("pt-BR"),
+            };
+            this.produtos.push(novoProduto);
+            localStorage.setItem("produtos", JSON.stringify(this.produtos));
+            this.form = { codigo: "", nome: "", preco: 0, validade: "" };
+          },
+        },
+      }).mount("#app");
+    </script>
+  </body>
+</html>
